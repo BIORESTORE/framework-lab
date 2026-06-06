@@ -1,0 +1,13 @@
+{
+  "name": "framework-lab",
+  "version": "0.1.0",
+  "description": "Test bench for LLM reasoning & transfer frameworks: run one, run all, or chain them — compare outputs side by side.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "list": "node cli.js list",
+    "serve": "node server.js"
+  },
+  "license": "MIT"
+}

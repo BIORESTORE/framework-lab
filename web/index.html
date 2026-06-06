@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>framework-lab</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--ink:#e8eaed;--muted:#9aa3b2;--accent:#6ea8fe;--accent3:#b58bff;--gold:#c9a227;--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line)}h1{font-size:17px;margin:0}
+header .muted{font-size:12px}
+.wrap{display:grid;grid-template-columns:330px 1fr;min-height:calc(100vh - 60px)}
+aside{border-right:1px solid var(--line);padding:14px;overflow:auto;max-height:calc(100vh - 60px)}
+main{padding:18px 22px;overflow:auto}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:16px 0 6px}
+textarea,input,select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;font:inherit}
+textarea{resize:vertical}
+.modes{display:flex;gap:6px;margin:8px 0}
+.modes button,.btn{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+.modes button.on{border-color:var(--accent);background:#1b2333}
+.run{background:var(--accent);color:#0a1322;font-weight:700;border:none;padding:10px 18px;border-radius:9px;cursor:pointer;font-size:14px}
+.run:disabled{opacity:.5}
+.cat{color:var(--accent3);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:12px 0 4px}
+.fw{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:6px 9px;border-radius:8px;margin-bottom:5px;cursor:pointer;font-size:12.5px;position:relative}
+.fw.on{border-color:var(--accent);background:#1b2333}
+.fw .o{color:var(--gold);font-size:10px}
+.fw .n{position:absolute;right:7px;top:6px;background:var(--accent3);color:#0a1322;font-weight:700;font-size:10px;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
+.card h3{margin:0 0 6px;font-size:13px;color:var(--accent)}
+.card.err h3{color:#e0685f}
+pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;margin:0;color:#cfe0d8}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid #34405a;border-top-color:var(--accent);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+.muted{color:var(--muted)}
+.calls{font-size:11px;color:var(--muted);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.presets button{margin:0 6px 6px 0}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header><h1>framework-lab <span class="muted" id="prov"></span></h1>
+<div class="muted">Pick frameworks → Run. Single = one; multi-select = compare; Chain mode = pipeline in click order.</div></header>
+<div class="wrap">
+<aside>
+  <h2>Task</h2><textarea id="task" rows="3">Create a Heinz Ketchup ad concept.</textarea>
+  <h2>Reference (optional)</h2><textarea id="reference" rows="3">Patek Philippe "Generations" luxury watch ads: stewardship, father and son, heirloom gravity, restraint.</textarea>
+  <h2>Target (optional)</h2><textarea id="target" rows="2">A coherent Heinz Ketchup ad that borrows the reference's gravity.</textarea>
+  <h2>Output</h2>
+  <select id="format"><option value="answer">Answer / concept</option><option value="image-prompt" selected>Image-gen prompt</option></select>
+  <h2>Mode</h2>
+  <div class="modes">
+    <button id="mSel" class="on">Selected</button>
+    <button id="mChain">⛓ Chain</button>
+  </div>
+  <div class="presets" id="presets"></div>
+  <button class="run" id="go">▶ Run</button> <span id="status" class="muted"></span>
+  <div id="cats"></div>
+</aside>
+<main id="out"><div class="muted">Results appear here. With no API key configured, the offline mock provider responds instantly (structure only).</div></main>
+</div>
+<script>
+let CAT=null, sel=new Set(), chain=[], mode="sel";
+const $=id=>document.getElementById(id);
+const esc=s=>(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+fetch("/api/catalog").then(r=>r.json()).then(c=>{
+  CAT=c; $("prov").textContent="· provider: "+c.provider;
+  const cats=$("cats");
+  for(const [key,label] of Object.entries(c.categories)){
+    const h=document.createElement("div");h.className="cat";h.textContent=label;cats.appendChild(h);
+    for(const f of c.frameworks.filter(f=>f.category===key)){
+      const b=document.createElement("button");b.className="fw";b.dataset.id=f.id;
+      b.innerHTML=`${f.name} ${f.orchestrated?'<span class="o">[multi-call]</span>':''}<span class="tagn"></span>`;
+      b.title=f.useCase+"\n\n"+f.instruction;
+      b.onclick=()=>toggle(f.id,b);cats.appendChild(b);
+    }
+  }
+  const ps=$("presets");
+  c.presets.forEach(p=>{const b=document.createElement("button");b.className="btn";b.textContent="⛓ "+p.name;
+    b.onclick=()=>{mode="chain";chain=[...p.ids];syncModes();paint();};ps.appendChild(b);});
+});
+
+function toggle(id,btn){
+  if(mode==="chain"){const i=chain.indexOf(id); i>-1?chain.splice(i,1):chain.push(id);}
+  else {sel.has(id)?sel.delete(id):sel.add(id);}
+  paint();
+}
+function paint(){
+  document.querySelectorAll(".fw").forEach(b=>{
+    const id=b.dataset.id;
+    const on=mode==="chain"?chain.includes(id):sel.has(id);
+    b.classList.toggle("on",on);
+    let n=b.querySelector(".n"); if(n)n.remove();
+    if(mode==="chain"&&chain.includes(id)){n=document.createElement("span");n.className="n";n.textContent=chain.indexOf(id)+1;b.appendChild(n);}
+  });
+}
+function syncModes(){$("mSel").classList.toggle("on",mode==="sel");$("mChain").classList.toggle("on",mode==="chain");paint();}
+$("mSel").onclick=()=>{mode="sel";syncModes();};
+$("mChain").onclick=()=>{mode="chain";syncModes();};
+
+$("go").onclick=async()=>{
+  const inputs={task:$("task").value,reference:$("reference").value,target:$("target").value};
+  const opts={format:$("format").value,freestyle:true};
+  const out=$("out");const go=$("go");
+  const ids=mode==="chain"?chain:[...sel];
+  if(!ids.length){out.innerHTML='<div class="card err"><h3>Nothing selected</h3><pre>Click frameworks in the sidebar first.</pre></div>';return;}
+  go.disabled=true;$("status").innerHTML='<span class="spin"></span> running '+ids.length+(mode==="chain"?"-stage chain":" framework(s)")+"…";
+  out.innerHTML="";
+  try{
+    const payload={mode:mode==="chain"?"chain":(ids.length===1?"single":"all"),ids,inputs,opts};
+    const r=await fetch("/api/run",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
+    const data=await r.json();
+    if(data.error)throw new Error(data.error);
+    if(payload.mode==="single")renderOne(out,data);
+    else if(payload.mode==="all")data.results.forEach(d=>renderOne(out,d));
+    else{data.stages.forEach((s,i)=>out.insertAdjacentHTML("beforeend",
+        `<div class="card"><h3>▼ ${i+1}. ${esc(s.framework.name)}</h3><pre>${esc(s.output)}</pre></div>`));
+      out.insertAdjacentHTML("beforeend",`<div class="card" style="border-color:var(--accent3)"><h3 style="color:var(--accent3)">■ Synthesis</h3><pre>${esc(data.output)}</pre></div>`);}
+    $("status").textContent="done";
+  }catch(e){out.innerHTML=`<div class="card err"><h3>Error</h3><pre>${esc(e.message)}</pre></div>`;$("status").textContent="";}
+  go.disabled=false;
+};
+function renderOne(out,d){
+  const calls=d.calls&&d.calls.length>1?`<div class="calls">${d.calls.length} model calls: ${d.calls.map(c=>esc(c.label)).join(" → ")}</div>`:"";
+  out.insertAdjacentHTML("beforeend",
+    `<div class="card${d.error?' err':''}"><h3>■ ${esc(d.framework.name)}</h3><pre>${esc(d.error??d.output)}</pre>${calls}</div>`);
+}
+</script>
+</body>
+</html>
