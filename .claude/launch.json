@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "framework-lab",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
+      "port": 3030
+    }
+  ]
+}
