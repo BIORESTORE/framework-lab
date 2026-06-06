@@ -24,11 +24,19 @@ jobs:
           PROVIDER=mock node cli.js list
           PROVIDER=mock node cli.js run cot --task "smoke test" > /dev/null
           PROVIDER=mock node cli.js chain genknow,blend --task "smoke test" > /dev/null
+          PROVIDER=mock node cli.js run cot --task "smoke test" --models m1,m2 > /dev/null
+          PROVIDER=mock node cli.js chain genknow:m1,blend:m2 --task "smoke test" > /dev/null
+          PROVIDER=mock node cli.js run debate --task "smoke test" --roles m1,m2,m3 > /dev/null
       - name: Server smoke test
         run: |
           PROVIDER=mock node server.js &
           sleep 1.5
+          curl -sf localhost:3030/health > /dev/null
           curl -sf localhost:3030/api/catalog > /dev/null
           curl -sf -X POST localhost:3030/api/run -H 'content-type: application/json' \
             -d '{"mode":"single","ids":["tot"],"inputs":{"task":"t"},"opts":{}}' > /dev/null
+          curl -sf -X POST localhost:3030/api/run -H 'content-type: application/json' \
+            -d '{"mode":"single","ids":["tot"],"inputs":{"task":"t"},"opts":{},"models":["m1","m2"]}' > /dev/null
+          curl -sf -X POST localhost:3030/api/run -H 'content-type: application/json' \
+            -d '{"mode":"chain","stages":[{"id":"genknow","model":"m1"},{"id":"blend","model":"m2"}],"inputs":{"task":"t"},"opts":{}}' > /dev/null
           kill %1

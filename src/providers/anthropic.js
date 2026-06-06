@@ -1,7 +1,7 @@
 /** Anthropic Messages API via fetch — zero dependencies. */
-export function anthropic(env = process.env) {
+export function anthropic(env = process.env, modelOverride) {
   const key = env.ANTHROPIC_API_KEY;
-  const model = env.ANTHROPIC_MODEL || "claude-sonnet-4-5";
+  const model = modelOverride || env.ANTHROPIC_MODEL || "claude-sonnet-4-5";
   if (!key) throw new Error("ANTHROPIC_API_KEY not set");
   return {
     name: `anthropic:${model}`,

@@ -2,7 +2,7 @@
 
 A zero-dependency test bench for **LLM reasoning & transfer frameworks**. Run any framework on any task, run a whole category side by side, or **chain** frameworks into a pipeline — and compare what each one actually produces.
 
-38 frameworks across 8 categories: linear (CoT, Zero/Few-shot CoT, Chain-of-Draft, Least-to-Most, Step-Back, Plan-and-Solve), branching (ToT, GoT, Forest, MCTS-style, Beam), hierarchical (Cascade, Recursive Decomposition, HTN, Skeleton-of-Thought), agentic (ReAct, ReWOO, Reflexion, Tool-chaining, Plan-Execute-Replan), self-improvement (Self-Consistency, Self-Refine, CoVe, Self-Ask, Constitutional, Debate), ensemble (Mixture-of-Agents, Maieutic, Universal Self-Consistency), prompting patterns (Analogical, Generated-Knowledge, PoT/PAL, Deep-breath), and transfer & adaptation (Structure Mapping, Conceptual Blending, Bisociation, Synectics, SCAMPER, TRIZ, Morphological, Lateral, Laddering, Persona).
+44 frameworks across 8 categories: linear (CoT, Zero/Few-shot CoT, Chain-of-Draft, Least-to-Most, Step-Back, Plan-and-Solve), branching (ToT, GoT, Forest, MCTS-style, Beam), hierarchical (Cascade, Recursive Decomposition, HTN, Skeleton-of-Thought), agentic (ReAct, ReWOO, Reflexion, Tool-chaining, Plan-Execute-Replan), self-improvement (Self-Consistency, Self-Refine, CoVe, Self-Ask, Constitutional, Debate), ensemble (Mixture-of-Agents, Maieutic, Universal Self-Consistency), prompting patterns (Analogical, Generated-Knowledge, PoT/PAL, Deep-breath), and transfer & adaptation (Structure Mapping, Conceptual Blending, Bisociation, Synectics, SCAMPER, TRIZ, Morphological, Lateral, Laddering, Persona).
 
 ## Quick start
 
@@ -49,11 +49,47 @@ Set in `.env`:
 
 | PROVIDER | needs | notes |
 |---|---|---|
+| `openrouter` | `OPENROUTER_API_KEY` | one key, hundreds of models — OpenAI-compatible; default `openai/gpt-4o-mini`. Best for comparing models. |
 | `anthropic` | `ANTHROPIC_API_KEY` | Messages API, default `claude-sonnet-4-5` |
 | `openai` | `OPENAI_API_KEY` | Chat Completions, default `gpt-4o-mini` |
 | `mock` (default fallback) | nothing | offline, deterministic — used by tests |
 
 Add a provider by dropping a file in `src/providers/` exposing `{ name, complete(prompt, opts) }`.
+
+## Compare across models
+
+OpenRouter gives every framework the same task on different models, side by side — so you can see how an orchestration behaves on, say, Claude vs GPT-4o vs Llama. The `--models` flag (and the web **Models** box) works with `run`, `run-all`, and `chain`; each model runs in its own isolated column, so one model failing doesn't abort the rest.
+
+```bash
+# one framework, three models
+node cli.js run debate --task "Is 1729 interesting?" \
+  --models openai/gpt-4o-mini,anthropic/claude-sonnet-4.5,meta-llama/llama-3.3-70b-instruct
+
+# a whole chain, compared across models
+node cli.js chain genknow,step-back,self-refine --task "..." \
+  --models openai/gpt-4o-mini,google/gemini-2.0-flash-001
+
+# one model only (no comparison)
+node cli.js run tot --task "..." --model anthropic/claude-sonnet-4.5
+```
+
+Each cell still shows every intermediate call, so multi-call orchestrations (Debate, Mixture-of-Agents, Self-Refine, Reflexion…) stay fully inspectable model-by-model.
+
+## Multi-model handoff
+
+Compare runs each model *alone*. Handoff is the opposite: one task, models *collaborate* — each step's output becomes the next step's input, on whatever model you assign. It works across the whole catalog, so you can route a problem through the frameworks and models that suit each stage.
+
+```bash
+# chain handoff — each stage on its own model (id:slug; the task hands off down the line)
+node cli.js chain plan:anthropic/claude-sonnet-4.5,l2m:openai/gpt-4o-mini,cove:meta-llama/llama-3.3-70b-instruct \
+  --task "Mitigate a 3-week port closure hitting our APAC supply chain"
+
+# role handoff — assign models to one orchestration's steps in order
+node cli.js run debate --task "Dual-source vs single-source our key component?" \
+  --roles anthropic/claude-sonnet-4.5,openai/gpt-4o-mini,anthropic/claude-sonnet-4.5
+```
+
+`--roles` follows each orchestration's call order: debate = advocate, opponent, judge · mixture-of-agents = specialists…, aggregator · self-refine = draft, critique, revise · reflexion = attempt, feedback, reflect, retry. Any step you don't name falls back to `--model` (or the provider default). In the web UI the **Per-step models** box does the same — slugs map to chain stages, or to an orchestration's steps in order. Every step's model is recorded and shown in the trace.
 
 ## Single-prompt vs orchestrated
 

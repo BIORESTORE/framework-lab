@@ -2,10 +2,10 @@
  * Offline deterministic provider. Lets tests + UI run with no API key.
  * Echoes recognizable structure so prompt-threading can be asserted.
  */
-export function mock() {
+export function mock(env = process.env, model) {
   let n = 0;
   return {
-    name: "mock",
+    name: model ? `mock:${model}` : "mock",
     async complete(prompt) {
       n++;
       const head = prompt.split("\n").find(l => l.trim()) || "";
