@@ -5,7 +5,7 @@
   "type": "module",
   "engines": { "node": ">=18" },
   "scripts": {
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test test/promptBuilder.test.js test/engine.test.js",
     "list": "node cli.js list",
     "serve": "node server.js"
   },
