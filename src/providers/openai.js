@@ -1,7 +1,7 @@
 /** OpenAI Chat Completions via fetch — zero dependencies. */
-export function openai(env = process.env) {
+export function openai(env = process.env, modelOverride) {
   const key = env.OPENAI_API_KEY;
-  const model = env.OPENAI_MODEL || "gpt-4o-mini";
+  const model = modelOverride || env.OPENAI_MODEL || "gpt-4o-mini";
   if (!key) throw new Error("OPENAI_API_KEY not set");
   return {
     name: `openai:${model}`,

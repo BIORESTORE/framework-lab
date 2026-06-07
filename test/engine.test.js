@@ -74,3 +74,32 @@ test("catalog integrity: unique ids, required fields", () => {
     }
   }
 });
+
+// ---- multi-model handoff ----
+
+test("runChain puts each stage on its own model and still threads output", async () => {
+  const engine = createEngine(m => mock({}, m));
+  const res = await engine.runChain([{ id: "genknow", model: "A" }, { id: "blend", model: "B" }], inputs);
+  assert.equal(res.stages[0].model, "A");
+  assert.equal(res.stages[1].model, "B");
+  assert.ok(res.stages[1].prompt.includes(res.stages[0].output)); // handoff intact across models
+});
+
+test("roleModels assign models to an orchestration's steps in order", async () => {
+  const engine = createEngine(m => mock({}, m));
+  const res = await engine.runSingle("debate", inputs, { roleModels: ["A", "B", "C"] });
+  assert.deepEqual(res.calls.map(c => c.model), ["A", "B", "C"]);
+});
+
+test("opts.model is the fallback for any step without an explicit model", async () => {
+  const engine = createEngine(m => mock({}, m));
+  const res = await engine.runSingle("self-refine", inputs, { model: "D", roleModels: ["A"] });
+  assert.deepEqual(res.calls.map(c => c.model), ["A", "D", "D"]); // draft=A, critique/revise fall back to D
+});
+
+test("the resolver is asked for each step's model (real per-model routing)", async () => {
+  const asked = [];
+  const engine = createEngine(m => { asked.push(m); return mock({}, m); });
+  await engine.runSingle("debate", inputs, { roleModels: ["A", "B", "C"] });
+  assert.deepEqual(asked, ["A", "B", "C"]);
+});

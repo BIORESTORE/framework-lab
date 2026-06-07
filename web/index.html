@@ -4,84 +4,190 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>framework-lab</title>
 <style>
-:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--ink:#e8eaed;--muted:#9aa3b2;--accent:#6ea8fe;--accent3:#b58bff;--gold:#c9a227;--mono:ui-monospace,Menlo,Consolas,monospace}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-header{padding:14px 20px;border-bottom:1px solid var(--line)}h1{font-size:17px;margin:0}
-header .muted{font-size:12px}
-.wrap{display:grid;grid-template-columns:330px 1fr;min-height:calc(100vh - 60px)}
-aside{border-right:1px solid var(--line);padding:14px;overflow:auto;max-height:calc(100vh - 60px)}
-main{padding:18px 22px;overflow:auto}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:16px 0 6px}
-textarea,input,select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;font:inherit}
-textarea{resize:vertical}
-.modes{display:flex;gap:6px;margin:8px 0}
-.modes button,.btn{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
-.modes button.on{border-color:var(--accent);background:#1b2333}
-.run{background:var(--accent);color:#0a1322;font-weight:700;border:none;padding:10px 18px;border-radius:9px;cursor:pointer;font-size:14px}
-.run:disabled{opacity:.5}
-.cat{color:var(--accent3);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:12px 0 4px}
-.fw{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:6px 9px;border-radius:8px;margin-bottom:5px;cursor:pointer;font-size:12.5px;position:relative}
-.fw.on{border-color:var(--accent);background:#1b2333}
-.fw .o{color:var(--gold);font-size:10px}
-.fw .n{position:absolute;right:7px;top:6px;background:var(--accent3);color:#0a1322;font-weight:700;font-size:10px;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
-.card h3{margin:0 0 6px;font-size:13px;color:var(--accent)}
-.card.err h3{color:#e0685f}
-pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;margin:0;color:#cfe0d8}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid #34405a;border-top-color:var(--accent);border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px}
+:root{
+  --paper:#f6f3ea;--card:#fffdf8;--card2:#fbf8f1;
+  --ink:#1c1a16;--muted:#6e6a5f;--faint:#9b9587;
+  --line:#e6e0d3;--line2:#d8d1c0;
+  --accent:#c0402f;--red:#c0402f;--accent-ink:#fff;--accent2:#345a86;--gold:#9a6a1f;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--r:4px;
+}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--serif);-webkit-font-smoothing:antialiased}
+code{font-family:var(--mono);font-size:.88em;background:#efeadf;border:1px solid var(--line2);padding:1px 5px;border-radius:3px}
+.app{display:grid;grid-template-rows:auto 1fr;height:100vh;border-top:4px solid var(--ink)}
+
+.topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px 26px 12px;border-bottom:2px solid var(--ink)}
+.brand{display:flex;flex-direction:column;gap:3px}
+.brand b{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1}
+.brand .sub{font-family:var(--sans);font-size:10.5px;text-transform:uppercase;letter-spacing:.22em;color:var(--muted)}
+.chips{display:flex;gap:20px;align-items:baseline;font-family:var(--sans)}
+.chip{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:700;font-family:var(--serif);font-size:15px;letter-spacing:0}
+.chip.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#2c9e6b;margin-right:6px;vertical-align:1px}
+
+.body{display:grid;grid-template-columns:312px 1fr;min-height:0}
+.catalog{display:flex;flex-direction:column;border-right:1px solid var(--line2);min-height:0;background:var(--card2)}
+.chead{padding:16px 16px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.search{position:relative}
+.search input{width:100%;background:#fff;border:1px solid var(--line2);border-radius:var(--r);color:var(--ink);padding:8px 12px 8px 30px;font:inherit;font-family:var(--sans);font-size:13px}
+.search::before{content:"⌕";position:absolute;left:10px;top:6px;color:var(--faint);font-size:16px}
+.selrow{display:flex;align-items:center;justify-content:space-between;font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.selrow b{color:var(--accent);font-family:var(--serif);font-size:15px;letter-spacing:0}
+.linkbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.1em;padding:0}.linkbtn:hover{color:var(--accent)}
+.list{overflow:auto;padding:2px 14px 18px;flex:1;min-height:0}
+.group{margin-bottom:4px}.group.hidden{display:none}
+.cat{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-family:var(--sans);color:var(--ink);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;margin:18px 0 4px;padding-bottom:5px;border-bottom:1.5px solid var(--ink)}
+.cat .c{color:var(--faint);font-weight:600}
+.fw{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);color:var(--ink);padding:7px 5px;cursor:pointer;font-family:var(--serif);font-size:14.5px;transition:color .12s,background .12s}
+.fw:hover{color:var(--accent);background:#faf5ec}
+.fw:hover .nm{text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+.fw.hidden{display:none}
+.fw.on{color:var(--accent);font-weight:700;background:#fbece8}
+.fw.on .nm::before{content:"▸ "}
+.fw .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fw .mc{font-family:var(--sans);font-size:8.5px;color:var(--gold);border:1px solid var(--gold);padding:1px 4px;border-radius:2px;text-transform:uppercase;letter-spacing:.06em;flex:none}
+.fw .n{font-family:var(--sans);background:var(--accent);color:#fff;font-weight:700;font-size:10px;border-radius:50%;width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+
+.main{overflow:auto;padding:24px 30px;min-height:0}
+.composer{background:var(--card);border:1px solid var(--line2);border-radius:var(--r);padding:20px 22px;margin-bottom:22px;max-width:1080px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.seg button{background:#fff;border:none;border-right:1px solid var(--ink);color:var(--ink);padding:7px 18px;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--ink);color:#fff}
+.lab{display:block;font-family:var(--sans);font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 7px}
+textarea,input.txt,select{width:100%;background:#fff;border:1px solid var(--line2);border-radius:var(--r);color:var(--ink);padding:11px 13px;font:inherit;font-family:var(--serif)}
+input.txt{font-family:var(--mono);font-size:12.5px}
+textarea{resize:vertical;font-size:15px;line-height:1.5}
+select{font-size:14px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,64,47,.14)}
+#task{min-height:62px}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+ ";font-family:var(--mono)}details[open] summary::before{content:"– "}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.hint{font-family:var(--sans);font-size:11px;color:var(--faint);margin-top:5px}
+.presets{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.pbtn{background:#fff;border:1px solid var(--line2);color:var(--muted);padding:5px 12px;border-radius:2px;cursor:pointer;font-family:var(--sans);font-size:11px}.pbtn:hover{color:var(--accent);border-color:var(--accent)}
+.runrow{display:flex;align-items:center;gap:14px;margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.run{background:var(--ink);color:#fff;font-weight:700;border:none;padding:11px 26px;border-radius:2px;cursor:pointer;font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.run:hover{background:var(--accent)}.run:disabled{opacity:.45;cursor:default}
+.status{font-family:var(--sans);font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+
+.empty{color:var(--faint);font-style:italic;font-size:15px;padding:40px 20px;text-align:center;border:1px dashed var(--line2);border-radius:var(--r);max-width:1080px}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:var(--r);padding:18px 22px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+.card.err{border-color:#d9a59c}.card.err h3{color:var(--accent)}
+pre{white-space:pre-wrap;font-family:var(--mono);font-size:12.5px;line-height:1.6;margin:0;color:#33302a}
+.calls{font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.tag{font-family:var(--sans);font-size:10px;color:var(--muted);background:#f0ece2;border:1px solid var(--line2);padding:1px 8px;border-radius:2px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid #d8d1c0;border-top-color:var(--accent);border-radius:50%;animation:s .7s linear infinite;vertical-align:-1px;margin-right:6px}
 @keyframes s{to{transform:rotate(360deg)}}
+.matrix{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;max-width:1400px}
+.col{min-width:0}
+.colhead{font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:11px;overflow-wrap:anywhere}
+.colhead .muted{font-weight:400;color:var(--faint);text-transform:none;letter-spacing:0}
 .muted{color:var(--muted)}
-.calls{font-size:11px;color:var(--muted);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
-.presets button{margin:0 6px 6px 0}
-@media(max-width:760px){.wrap{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+@media(max-width:820px){.body{grid-template-columns:1fr}.catalog{border-right:0;border-bottom:1px solid var(--line2);max-height:40vh}.fields{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><h1>framework-lab <span class="muted" id="prov"></span></h1>
-<div class="muted">Pick frameworks → Run. Single = one; multi-select = compare; Chain mode = pipeline in click order.</div></header>
-<div class="wrap">
-<aside>
-  <h2>Task</h2><textarea id="task" rows="3">Create a Heinz Ketchup ad concept.</textarea>
-  <h2>Reference (optional)</h2><textarea id="reference" rows="3">Patek Philippe "Generations" luxury watch ads: stewardship, father and son, heirloom gravity, restraint.</textarea>
-  <h2>Target (optional)</h2><textarea id="target" rows="2">A coherent Heinz Ketchup ad that borrows the reference's gravity.</textarea>
-  <h2>Output</h2>
-  <select id="format"><option value="answer">Answer / concept</option><option value="image-prompt" selected>Image-gen prompt</option></select>
-  <h2>Mode</h2>
-  <div class="modes">
-    <button id="mSel" class="on">Selected</button>
-    <button id="mChain">⛓ Chain</button>
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><b>framework-lab</b><span class="sub">reasoning &amp; transfer test bench</span></div>
+    <div class="chips"><span class="chip" id="count">…</span><span class="chip live" id="prov">connecting…</span></div>
   </div>
-  <div class="presets" id="presets"></div>
-  <button class="run" id="go">▶ Run</button> <span id="status" class="muted"></span>
-  <div id="cats"></div>
-</aside>
-<main id="out"><div class="muted">Results appear here. With no API key configured, the offline mock provider responds instantly (structure only).</div></main>
+  <div class="body">
+    <aside class="catalog">
+      <div class="chead">
+        <div class="search"><input id="search" placeholder="Search frameworks…" autocomplete="off"></div>
+        <div class="selrow"><span><b id="selcount">0</b> selected</span><button class="linkbtn" id="clear">clear</button></div>
+      </div>
+      <div class="list" id="cats"></div>
+    </aside>
+    <main class="main">
+      <div class="composer">
+        <div class="seg"><button id="mSel" class="on">Selected</button><button id="mChain">⛓ Chain</button></div>
+        <label class="lab">Task</label>
+        <textarea id="task" rows="2">Plan a resilient response to a 3-week port closure disrupting an APAC supply chain.</textarea>
+        <details>
+          <summary>Transfer inputs &amp; output format — for cross-domain creative tasks</summary>
+          <div style="margin-top:11px">
+            <label class="lab">Reference (optional)</label>
+            <textarea id="reference" rows="2" placeholder="e.g. Patek Philippe 'Generations' ads: stewardship, heirloom gravity, restraint."></textarea>
+            <label class="lab" style="margin-top:11px">Target (optional)</label>
+            <textarea id="target" rows="2" placeholder="e.g. A Heinz Ketchup ad that borrows the reference's gravity."></textarea>
+            <label class="lab" style="margin-top:11px">Output format</label>
+            <select id="format"><option value="answer" selected>Answer / concept</option><option value="image-prompt">Image-gen prompt</option></select>
+          </div>
+        </details>
+        <div class="fields">
+          <div>
+            <label class="lab">Models — compare</label>
+            <input class="txt" id="models" placeholder="openai/gpt-4o-mini, anthropic/claude-sonnet-4.5" autocomplete="off">
+            <div class="hint">One = run on it. Two+ = run side by side.</div>
+          </div>
+          <div>
+            <label class="lab">Per-step models — handoff</label>
+            <input class="txt" id="steps" placeholder="anthropic/claude-sonnet-4.5, openai/gpt-4o-mini" autocomplete="off">
+            <div class="hint">Chain: one per stage. One multi-step framework: one per step.</div>
+          </div>
+        </div>
+        <div class="presets" id="presets"></div>
+        <div class="runrow"><button class="run" id="go">▶ Run</button><span class="status" id="status"></span></div>
+      </div>
+      <div id="out"><div class="empty">Pick frameworks on the left, set a task, and Run. With no API key the offline mock provider responds instantly (structure only).</div></div>
+    </main>
+  </div>
 </div>
 <script>
 let CAT=null, sel=new Set(), chain=[], mode="sel";
 const $=id=>document.getElementById(id);
 const esc=s=>(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 
-fetch("/api/catalog").then(r=>r.json()).then(c=>{
-  CAT=c; $("prov").textContent="· provider: "+c.provider;
+fetch("/api/catalog").then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(c=>{
+  CAT=c;
+  $("count").innerHTML=`<b>${c.frameworks.length}</b> frameworks`;
+  $("prov").textContent="provider: "+c.provider;
+  $("search").placeholder=`Search ${c.frameworks.length} frameworks…`;
   const cats=$("cats");
   for(const [key,label] of Object.entries(c.categories)){
-    const h=document.createElement("div");h.className="cat";h.textContent=label;cats.appendChild(h);
-    for(const f of c.frameworks.filter(f=>f.category===key)){
-      const b=document.createElement("button");b.className="fw";b.dataset.id=f.id;
-      b.innerHTML=`${f.name} ${f.orchestrated?'<span class="o">[multi-call]</span>':''}<span class="tagn"></span>`;
+    const items=c.frameworks.filter(f=>f.category===key);
+    const g=document.createElement("div");g.className="group";
+    const h=document.createElement("div");h.className="cat";
+    h.innerHTML=`<span>${esc(label)}</span><span class="c">${items.length}</span>`;g.appendChild(h);
+    for(const f of items){
+      const b=document.createElement("button");b.className="fw";b.dataset.id=f.id;b.dataset.name=(f.name+" "+f.id).toLowerCase();
+      b.innerHTML=`<span class="nm">${esc(f.name)}</span>${f.orchestrated?'<span class="mc">multi-call</span>':''}`;
       b.title=f.useCase+"\n\n"+f.instruction;
-      b.onclick=()=>toggle(f.id,b);cats.appendChild(b);
+      b.onclick=()=>toggle(f.id,b);g.appendChild(b);
     }
+    cats.appendChild(g);
   }
   const ps=$("presets");
-  c.presets.forEach(p=>{const b=document.createElement("button");b.className="btn";b.textContent="⛓ "+p.name;
-    b.onclick=()=>{mode="chain";chain=[...p.ids];syncModes();paint();};ps.appendChild(b);});
+  c.presets.forEach(p=>{const b=document.createElement("button");b.className="pbtn";b.textContent="⛓ "+p.name;b.title=p.ids.join(" → ");
+    b.onclick=()=>{mode="chain";chain=[...p.ids];syncModes();};ps.appendChild(b);});
+}).catch(e=>{
+  $("count").textContent="catalog not loaded";$("prov").textContent="offline";$("prov").classList.remove("live");
+  $("cats").innerHTML=`<div class="cat" style="color:var(--red)">Frameworks didn't load</div><div class="muted" style="font-size:12px;line-height:1.6;padding:0 6px">The list comes from the server at <code>/api/catalog</code> — this page is only the client; the frameworks live in <code>src/catalog.js</code>. Open it <b>through the running server</b>:<br><br><code>node server.js</code><br>then visit <code>http://localhost:3030/</code><br><br>(${esc(e.message)})</div>`;
+  $("out").innerHTML=`<div class="card err"><h3>No catalog</h3><pre>Couldn't reach /api/catalog. Start the server:  node server.js</pre></div>`;
 });
 
+$("search").oninput=e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".group").forEach(g=>{
+    let vis=0;
+    g.querySelectorAll(".fw").forEach(b=>{const m=!q||b.dataset.name.includes(q);b.classList.toggle("hidden",!m);if(m)vis++;});
+    g.classList.toggle("hidden",vis===0);
+  });
+};
+$("clear").onclick=()=>{sel.clear();chain=[];paint();};
+
 function toggle(id,btn){
-  if(mode==="chain"){const i=chain.indexOf(id); i>-1?chain.splice(i,1):chain.push(id);}
-  else {sel.has(id)?sel.delete(id):sel.add(id);}
+  if(mode==="chain"){const i=chain.indexOf(id);i>-1?chain.splice(i,1):chain.push(id);}
+  else{sel.has(id)?sel.delete(id):sel.add(id);}
   paint();
 }
 function paint(){
@@ -89,9 +195,10 @@ function paint(){
     const id=b.dataset.id;
     const on=mode==="chain"?chain.includes(id):sel.has(id);
     b.classList.toggle("on",on);
-    let n=b.querySelector(".n"); if(n)n.remove();
+    let n=b.querySelector(".n");if(n)n.remove();
     if(mode==="chain"&&chain.includes(id)){n=document.createElement("span");n.className="n";n.textContent=chain.indexOf(id)+1;b.appendChild(n);}
   });
+  $("selcount").textContent=mode==="chain"?chain.length:sel.size;
 }
 function syncModes(){$("mSel").classList.toggle("on",mode==="sel");$("mChain").classList.toggle("on",mode==="chain");paint();}
 $("mSel").onclick=()=>{mode="sel";syncModes();};
@@ -100,27 +207,49 @@ $("mChain").onclick=()=>{mode="chain";syncModes();};
 $("go").onclick=async()=>{
   const inputs={task:$("task").value,reference:$("reference").value,target:$("target").value};
   const opts={format:$("format").value,freestyle:true};
+  const modelList=$("models").value.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  const stepList=$("steps").value.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  if(modelList.length===1)opts.model=modelList[0];
+  const compare=modelList.length>1;
   const out=$("out");const go=$("go");
   const ids=mode==="chain"?chain:[...sel];
-  if(!ids.length){out.innerHTML='<div class="card err"><h3>Nothing selected</h3><pre>Click frameworks in the sidebar first.</pre></div>';return;}
-  go.disabled=true;$("status").innerHTML='<span class="spin"></span> running '+ids.length+(mode==="chain"?"-stage chain":" framework(s)")+"…";
+  if(!ids.length){out.innerHTML='<div class="card err"><h3>Nothing selected</h3><pre>Pick one or more frameworks on the left first.</pre></div>';return;}
+  const runMode=mode==="chain"?"chain":(ids.length===1?"single":"all");
+  if(!compare&&stepList.length&&runMode!=="chain")opts.roleModels=stepList;
+  go.disabled=true;$("status").innerHTML='<span class="spin"></span>running '+ids.length+(mode==="chain"?"-stage chain":" framework(s)")+(compare?" × "+modelList.length+" models":"")+"…";
   out.innerHTML="";
   try{
-    const payload={mode:mode==="chain"?"chain":(ids.length===1?"single":"all"),ids,inputs,opts};
+    const payload={mode:runMode,ids,inputs,opts};
+    if(compare)payload.models=modelList;
+    else if(runMode==="chain"&&stepList.length)payload.stages=ids.map((id,i)=>stepList[i]?{id,model:stepList[i]}:{id});
     const r=await fetch("/api/run",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
     const data=await r.json();
     if(data.error)throw new Error(data.error);
-    if(payload.mode==="single")renderOne(out,data);
-    else if(payload.mode==="all")data.results.forEach(d=>renderOne(out,d));
-    else{data.stages.forEach((s,i)=>out.insertAdjacentHTML("beforeend",
-        `<div class="card"><h3>▼ ${i+1}. ${esc(s.framework.name)}</h3><pre>${esc(s.output)}</pre></div>`));
-      out.insertAdjacentHTML("beforeend",`<div class="card" style="border-color:var(--accent3)"><h3 style="color:var(--accent3)">■ Synthesis</h3><pre>${esc(data.output)}</pre></div>`);}
+    if(compare){
+      const grid=document.createElement("div");grid.className="matrix";out.appendChild(grid);
+      data.columns.forEach(col=>{
+        const c=document.createElement("div");c.className="col";
+        c.innerHTML=`<div class="colhead">${esc(col.model)} <span class="muted">${esc(col.provider)}</span></div>`;
+        grid.appendChild(c);
+        if(col.error)c.insertAdjacentHTML("beforeend",`<div class="card err"><h3>Error</h3><pre>${esc(col.error)}</pre></div>`);
+        else renderInto(c,col.mode,col.result);
+      });
+    }else renderInto(out,runMode,data);
     $("status").textContent="done";
   }catch(e){out.innerHTML=`<div class="card err"><h3>Error</h3><pre>${esc(e.message)}</pre></div>`;$("status").textContent="";}
   go.disabled=false;
 };
+function renderInto(container,mode,data){
+  if(mode==="single")renderOne(container,data);
+  else if(mode==="all")data.results.forEach(d=>renderOne(container,d));
+  else{
+    data.stages.forEach((s,i)=>container.insertAdjacentHTML("beforeend",
+      `<div class="card"><h3>▼ ${i+1}. ${esc(s.framework.name)} <span class="tag">${esc(s.model||"")}</span></h3><pre>${esc(s.output)}</pre></div>`));
+    container.insertAdjacentHTML("beforeend",`<div class="card" style="border-color:var(--accent2)"><h3 style="color:var(--accent2)">■ Synthesis <span class="tag">${esc(data.synthesis?data.synthesis.model:"")}</span></h3><pre>${esc(data.output)}</pre></div>`);
+  }
+}
 function renderOne(out,d){
-  const calls=d.calls&&d.calls.length>1?`<div class="calls">${d.calls.length} model calls: ${d.calls.map(c=>esc(c.label)).join(" → ")}</div>`:"";
+  const calls=d.calls&&d.calls.length>1?`<div class="calls">${d.calls.length} steps:&nbsp; ${d.calls.map(c=>esc(c.label)+(c.model?` · ${esc(c.model)}`:"")).join("&nbsp; → &nbsp;")}</div>`:"";
   out.insertAdjacentHTML("beforeend",
     `<div class="card${d.error?' err':''}"><h3>■ ${esc(d.framework.name)}</h3><pre>${esc(d.error??d.output)}</pre>${calls}</div>`);
 }
